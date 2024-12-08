@@ -16,6 +16,7 @@ import me.rochblondiaux.limbo.Limbo;
 import me.rochblondiaux.limbo.connection.ConnectionManager;
 import me.rochblondiaux.limbo.network.PacketHandler;
 import me.rochblondiaux.limbo.network.connection.ClientChannelInitializer;
+import me.rochblondiaux.limbo.network.protocol.PacketSnapshots;
 import me.rochblondiaux.limbo.network.protocol.model.Version;
 
 @Log4j2
@@ -44,6 +45,9 @@ public class LimboServer {
 
         // Packet handler
         this.packetHandler = new PacketHandler(this.app, this);
+
+        // Snapshots
+        PacketSnapshots.init(this.app, this);
 
         // Bootstrap
         this.startBootstrap();

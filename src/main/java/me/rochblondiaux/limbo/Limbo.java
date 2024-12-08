@@ -16,6 +16,7 @@ import me.rochblondiaux.limbo.command.model.Command;
 import me.rochblondiaux.limbo.configuration.ServerConfiguration;
 import me.rochblondiaux.limbo.server.LimboServer;
 import me.rochblondiaux.limbo.server.console.LimboConsole;
+import me.rochblondiaux.limbo.world.DimensionRegistry;
 
 @Log4j2(topic = "Limbo")
 @Getter
@@ -26,6 +27,7 @@ public class Limbo {
 
     private final LimboConsole console;
     private final LimboServer server;
+    private final DimensionRegistry dimensions;
     private final ServerConfiguration configuration;
     private final CommandManager commands;
 
@@ -37,6 +39,14 @@ public class Limbo {
 
         // Shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(this::terminate, "Limbo Shutdown Thread"));
+
+        // Dimensions
+        this.dimensions = new DimensionRegistry();
+        try {
+            this.dimensions.load("overworld"); // TODO: Load from configuration
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load dimensions", e);
+        }
 
         // Commands
         this.commands = new CommandManager(this);
@@ -50,12 +60,14 @@ public class Limbo {
         this.commands.register(Command.builder()
                 .name("help")
                 .usage("/help [command]")
+                .aliases(Set.of("?"))
                 .description("Displays help for a command")
                 .executor(new HelpCommand(this))
                 .build());
         this.commands.register(Command.builder()
                 .name("reload")
                 .usage("/reload")
+                .aliases(Set.of("rl"))
                 .description("Reloads the server configuration")
                 .executor(new ReloadCommand(this))
                 .build());
@@ -97,7 +109,8 @@ public class Limbo {
         long start = System.currentTimeMillis();
 
         // Server
-        this.server.stop();
+        if (this.server != null)
+            this.server.stop();
 
         log.info("Limbo stopped in {}ms", System.currentTimeMillis() - start);
     }

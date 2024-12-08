@@ -29,6 +29,7 @@ public class ServerConfiguration {
     private int readTimeout;
     private Component motd;
     private int motdProtocol;
+    private String brand;
 
     public ServerConfiguration(Path dataFolder) {
         this.path = dataFolder.resolve("server.properties");
@@ -72,6 +73,7 @@ public class ServerConfiguration {
         this.motd = rawMotd != null ? MINI_MESSAGE.deserialize(rawMotd) : Component.empty();
 
         this.motdProtocol = Integer.parseInt(properties.getProperty("motd-protocol"));
+        this.brand = properties.getProperty("brand");
     }
 
     public void save() throws ConfigurationSaveException {

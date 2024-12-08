@@ -16,14 +16,14 @@ public class PacketSnapshot implements ClientboundPacket {
         Map<Integer, Version> hashes = new HashMap<>();
 
         for (Version version : Version.values()) {
-            if (version.equals(Version.UNDEFINED)) continue;
+            if (version.equals(Version.UNDEFINED))
+                continue;
 
             ByteMessage encodedMessage = ByteMessage.create();
             packet.encode(encodedMessage, version);
 
             int hash = encodedMessage.hashCode();
             Version hashed = hashes.get(hash);
-
             if (hashed != null) {
                 mappings.put(version, hashed);
             } else {

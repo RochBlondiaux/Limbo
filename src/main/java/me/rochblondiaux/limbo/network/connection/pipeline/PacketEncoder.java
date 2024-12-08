@@ -25,13 +25,17 @@ public class PacketEncoder extends MessageToByteEncoder<ClientboundPacket> {
         if (this.registry == null)
             return;
 
+        String packetName = packet.getClass().getSimpleName();
+        if (packet instanceof PacketSnapshot snapshot)
+            packetName = snapshot.packet().getClass().getSimpleName();
+
         // Wrap the output buffer
         ByteMessage message = new ByteMessage(output);
 
         // Retrieve the packet ID
         int packetId = this.registry.getPacketId(packet instanceof PacketSnapshot snapshot ? snapshot.packet().getClass() : packet.getClass());
         if (packetId == -1) {
-            log.error("Unknown packet: {}[0x{}] ({} bytes)", packet.getClass().getSimpleName(), Integer.toHexString(packetId), output.readableBytes());
+            log.error("Unknown packet: {}[0x{}] ({} bytes)", packetName, Integer.toHexString(packetId), output.readableBytes());
             return;
         }
 
@@ -42,9 +46,9 @@ public class PacketEncoder extends MessageToByteEncoder<ClientboundPacket> {
         try {
             packet.encode(message, this.version);
 
-            log.debug("Sending {}[0x{}] packet with {} bytes", packet.getClass().getSimpleName(), Integer.toHexString(packetId), output.readableBytes());
+            log.debug("Sending {}[0x{}] packet with {} bytes", packetName, Integer.toHexString(packetId), output.readableBytes());
         } catch (Exception e) {
-            log.error("Error while encoding packet: {}[0x{}]", packet.getClass().getSimpleName(), Integer.toHexString(packetId), e);
+            log.error("Error while encoding packet: {}[0x{}]", packetName, Integer.toHexString(packetId), e);
         }
 
     }

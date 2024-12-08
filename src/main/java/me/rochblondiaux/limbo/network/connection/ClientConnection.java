@@ -1,6 +1,7 @@
 package me.rochblondiaux.limbo.network.connection;
 
 import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -16,10 +17,12 @@ import me.rochblondiaux.limbo.Limbo;
 import me.rochblondiaux.limbo.network.GameProfile;
 import me.rochblondiaux.limbo.network.connection.pipeline.PacketDecoder;
 import me.rochblondiaux.limbo.network.connection.pipeline.PacketEncoder;
+import me.rochblondiaux.limbo.network.protocol.PacketSnapshots;
 import me.rochblondiaux.limbo.network.protocol.model.ClientboundPacket;
 import me.rochblondiaux.limbo.network.protocol.model.ConnectionState;
 import me.rochblondiaux.limbo.network.protocol.model.ServerboundPacket;
 import me.rochblondiaux.limbo.network.protocol.model.Version;
+import me.rochblondiaux.limbo.network.protocol.packets.login.clientbound.ClientboundLoginSuccessPacket;
 import me.rochblondiaux.limbo.server.LimboServer;
 
 @Getter
@@ -34,7 +37,7 @@ public class ClientConnection extends ChannelInboundHandlerAdapter {
     private final PacketDecoder decoder;
     private final PacketEncoder encoder;
 
-    private ConnectionState state;
+    private ConnectionState state = ConnectionState.HANDSHAKE;
     private Version version;
     @Delegate
     private GameProfile profile;
@@ -87,14 +90,14 @@ public class ClientConnection extends ChannelInboundHandlerAdapter {
     }
 
     public void updateState(ConnectionState state) {
+        log.debug("Connection state updated from {} to {}", this.state, state);
         this.state = state;
         decoder.updateState(state);
         encoder.updateState(state);
     }
 
-    public void updateEncoderVersion(Version version) {
-        this.version = version;
-        encoder.updateVersion(version);
+    public void updateEncoderState(ConnectionState state) {
+        encoder.updateState(state);
     }
 
     public void updateVersion(Version version) {
@@ -115,5 +118,43 @@ public class ClientConnection extends ChannelInboundHandlerAdapter {
     public void disconnect() {
         this.ensureConnected();
         this.channel.close();
+    }
+
+    public void fireLoginSuccess() {
+        // TODO: check for velocity login message id
+        log.debug("Firing login success for {}", this.username());
+
+        // Send login success
+        sendPacket(new ClientboundLoginSuccessPacket(
+                uniqueId(),
+                username()
+        ));
+        server.connections().register(this);
+
+        // TODO: instantiate and register player
+
+        // Prepare configuration state
+        if (this.version.moreOrEqual(Version.V1_20_2)) {
+            updateEncoderState(ConnectionState.CONFIGURATION);
+            return;
+        }
+
+        this.spawnPlayer();
+    }
+
+    public void spawnPlayer() {
+        log.debug("Spawning player {}", this.username());
+        this.updateState(ConnectionState.PLAY);
+
+        Runnable sendPlayPackets = () -> {
+            this.writePacket(PacketSnapshots.PACKET_JOIN_GAME);
+            this.writePacket(PacketSnapshots.PLAYER_ABILITIES);
+
+        };
+
+        if (this.version().lessOrEqual(Version.V1_7_6))
+            this.channel().eventLoop().schedule(sendPlayPackets, 100, TimeUnit.MILLISECONDS);
+        else
+            sendPlayPackets.run();
     }
 }

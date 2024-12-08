@@ -18,12 +18,12 @@ public class ConnectionManager {
 
     public void register(ClientConnection connection) {
         this.connections.put(connection.uniqueId(), connection);
-        log.info("Player {} connected ({}) [{}]", connection.profile().name(), connection.address(), connection.version().prettyName());
+        log.info("Player {} connected ({}) [{}]", connection.profile().username(), connection.address(), connection.version());
     }
 
     public void unregister(ClientConnection connection) {
         this.connections.remove(connection.uniqueId());
-        log.info("Player {} disconnected ({})", connection.profile().name(), connection.address());
+        log.info("Player {} disconnected ({})", connection.profile().username(), connection.address());
     }
 
     public int count() {
