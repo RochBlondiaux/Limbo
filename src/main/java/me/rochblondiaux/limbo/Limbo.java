@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import me.rochblondiaux.limbo.command.CommandManager;
 import me.rochblondiaux.limbo.command.implementation.HelpCommand;
+import me.rochblondiaux.limbo.command.implementation.ReloadCommand;
 import me.rochblondiaux.limbo.command.implementation.StopCommand;
 import me.rochblondiaux.limbo.command.model.Command;
 import me.rochblondiaux.limbo.configuration.ServerConfiguration;
@@ -51,6 +52,12 @@ public class Limbo {
                 .usage("/help [command]")
                 .description("Displays help for a command")
                 .executor(new HelpCommand(this))
+                .build());
+        this.commands.register(Command.builder()
+                .name("reload")
+                .usage("/reload")
+                .description("Reloads the server configuration")
+                .executor(new ReloadCommand(this))
                 .build());
 
         // Console
