@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="warn">
     <Appenders>
-        <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout
-                    pattern="[%d{HH:mm:ss} %-5p] [%c{1}]: %m%n"/>
-        </Console>
+        <TerminalConsole name="console">
+            <PatternLayout pattern="[%d{HH:mm:ss} %level]: %msg%n"/>
+        </TerminalConsole>
         <RollingFile name="rollingFile"
                      fileName="logs/latest.log"
                      filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
@@ -18,7 +17,7 @@
         </RollingFile>
     </Appenders>
     <Loggers>
-        <Root level="info" additivity="false">
+        <Root level="debug" additivity="false">
             <AppenderRef ref="console"/>
             <AppenderRef ref="rollingFile"/>
         </Root>
