@@ -23,6 +23,7 @@ public class ServerConfiguration {
     private String host;
     private int port;
     private int maxPlayers;
+    private int readTimeout;
 
     public ServerConfiguration(Path dataFolder) {
         this.path = dataFolder.resolve("server.properties");
@@ -60,6 +61,7 @@ public class ServerConfiguration {
         this.host = properties.getProperty("host");
         this.port = Integer.parseInt(properties.getProperty("port"));
         this.maxPlayers = Integer.parseInt(properties.getProperty("max-players"));
+        this.readTimeout = Integer.parseInt(properties.getProperty("read-timeout"));
     }
 
     public void save() throws ConfigurationSaveException {

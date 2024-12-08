@@ -29,6 +29,7 @@
         <log4j.version>2.24.2</log4j.version>
         <jline.version>3.27.1</jline.version>
         <adventure.version>4.17.0</adventure.version>
+        <netty.version>4.1.115.Final</netty.version>
     </properties>
 
     <!-- dependencies -->
@@ -81,6 +82,18 @@
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-plain</artifactId>
             <version>${adventure.version}</version>
+        </dependency>
+        <!-- adventure/nbt -->
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-nbt</artifactId>
+            <version>${adventure.version}</version>
+        </dependency>
+        <!-- netty -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>${netty.version}</version>
         </dependency>
     </dependencies>
 

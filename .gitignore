@@ -282,6 +282,6 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/vim,java,macos,maven,eclipse,windows,intellij+all
 
+# Testing
 logs/
-
-server.properties
+/server.properties

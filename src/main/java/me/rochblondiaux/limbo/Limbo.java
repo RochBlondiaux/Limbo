@@ -13,6 +13,7 @@ import me.rochblondiaux.limbo.command.implementation.HelpCommand;
 import me.rochblondiaux.limbo.command.implementation.StopCommand;
 import me.rochblondiaux.limbo.command.model.Command;
 import me.rochblondiaux.limbo.configuration.ServerConfiguration;
+import me.rochblondiaux.limbo.server.LimboServer;
 import me.rochblondiaux.limbo.server.console.LimboConsole;
 
 @Log4j2(topic = "Limbo")
@@ -21,15 +22,20 @@ public class Limbo {
 
     private final Path dataFolder;
     private final AtomicBoolean running = new AtomicBoolean(true);
+
     private final LimboConsole console;
+    private final LimboServer server;
     private final ServerConfiguration configuration;
     private final CommandManager commands;
 
     public Limbo() {
+        log.info("Starting limbo...");
+        long start = System.currentTimeMillis();
+
         this.dataFolder = Paths.get("").toAbsolutePath();
 
         // Shutdown hook
-        Runtime.getRuntime().addShutdownHook(new Thread(this::terminate));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::terminate, "Limbo Shutdown Thread"));
 
         // Commands
         this.commands = new CommandManager(this);
@@ -65,6 +71,12 @@ public class Limbo {
         }
         log.info("Configuration loaded successfully");
 
+        // Server
+        this.server = new LimboServer(this);
+        this.server.start();
+
+        log.info("Limbo started in {}ms", System.currentTimeMillis() - start);
+
         // Start console
         this.console.start();
     }
@@ -74,10 +86,12 @@ public class Limbo {
     }
 
     private void terminate() {
-        log.info("Stopping server...");
+        log.info("Stopping limbo...");
+        long start = System.currentTimeMillis();
 
-        // TODO: Add server shutdown logic here
+        // Server
+        this.server.stop();
 
-        log.info("Server stopped");
+        log.info("Limbo stopped in {}ms", System.currentTimeMillis() - start);
     }
 }
