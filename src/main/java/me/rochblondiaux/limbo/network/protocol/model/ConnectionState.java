@@ -7,6 +7,11 @@ import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.rochblondiaux.limbo.network.protocol.packets.ServerboundHandshakePacket;
+import me.rochblondiaux.limbo.network.protocol.packets.login.ClientboundDisconnectPacket;
+import me.rochblondiaux.limbo.network.protocol.packets.status.clientbound.ClientboundStatusPongPacket;
+import me.rochblondiaux.limbo.network.protocol.packets.status.clientbound.ClientboundStatusResponsePacket;
+import me.rochblondiaux.limbo.network.protocol.packets.status.serverbound.ServerboundStatusPingPacket;
+import me.rochblondiaux.limbo.network.protocol.packets.status.serverbound.ServerboundStatusRequestPacket;
 import me.rochblondiaux.limbo.network.protocol.registry.Mapping;
 import me.rochblondiaux.limbo.network.protocol.registry.ProtocolMappings;
 
@@ -15,11 +20,25 @@ import me.rochblondiaux.limbo.network.protocol.registry.ProtocolMappings;
 public enum ConnectionState {
     HANDSHAKE(0) {
         {
-            registerServerBoundPacket(ServerboundHandshakePacket::new, map(0x00, Version.min(), Version.max()));
+            registerServerBoundPacket(ServerboundHandshakePacket::new, map(0x00));
         }
     },
-    STATUS(1),
-    LOGIN(2),
+    STATUS(1) {
+        {
+            // Client -> Server
+            registerServerBoundPacket(ServerboundStatusRequestPacket::new, map(0x00));
+            registerServerBoundPacket(ServerboundStatusPingPacket::new, map(0x01));
+
+            // Server -> Client
+            registerClientBoundPacket(ClientboundStatusResponsePacket::new, map(0x00));
+            registerClientBoundPacket(ClientboundStatusPongPacket::new, map(0x01));
+        }
+    },
+    LOGIN(2) {
+        {
+            registerClientBoundPacket(ClientboundDisconnectPacket::new, map(0x00));
+        }
+    },
     CONFIGURATION(3),
     PLAY(4);
 
@@ -52,11 +71,19 @@ public enum ConnectionState {
         return new Mapping(packetId, from, to);
     }
 
-    void registerServerBoundPacket(Supplier<?> packet, Mapping mapping) {
+    private static Mapping map(int packetId, Version version) {
+        return new Mapping(packetId, version, version);
+    }
+
+    private static Mapping map(int packetId) {
+        return new Mapping(packetId, Version.min(), Version.max());
+    }
+
+    void registerServerBoundPacket(Supplier<? extends ServerboundPacket> packet, Mapping mapping) {
         serverBound.register(packet, mapping);
     }
 
-    void registerClientBoundPacket(Supplier<?> packet, Mapping mapping) {
+    void registerClientBoundPacket(Supplier<? extends ClientboundPacket> packet, Mapping mapping) {
         clientBound.register(packet, mapping);
     }
 }

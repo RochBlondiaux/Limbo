@@ -10,11 +10,14 @@ import java.util.Properties;
 import lombok.Getter;
 import me.rochblondiaux.limbo.exception.configuration.ConfigurationLoadException;
 import me.rochblondiaux.limbo.exception.configuration.ConfigurationSaveException;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
 @Getter
 public class ServerConfiguration {
 
     public static final String COMMENT = "For explanation of what each of the options does, please visit:\nhttps://github.com/RochBlondiaux/Limbo/blob/master/src/main/resources/configuration/server.properties";
+    public static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
     private final Path path;
     private Properties properties;
@@ -24,6 +27,8 @@ public class ServerConfiguration {
     private int port;
     private int maxPlayers;
     private int readTimeout;
+    private Component motd;
+    private int motdProtocol;
 
     public ServerConfiguration(Path dataFolder) {
         this.path = dataFolder.resolve("server.properties");
@@ -62,6 +67,11 @@ public class ServerConfiguration {
         this.port = Integer.parseInt(properties.getProperty("port"));
         this.maxPlayers = Integer.parseInt(properties.getProperty("max-players"));
         this.readTimeout = Integer.parseInt(properties.getProperty("read-timeout"));
+
+        String rawMotd = properties.getProperty("motd");
+        this.motd = rawMotd != null ? MINI_MESSAGE.deserialize(rawMotd) : Component.empty();
+
+        this.motdProtocol = Integer.parseInt(properties.getProperty("motd-protocol"));
     }
 
     public void save() throws ConfigurationSaveException {

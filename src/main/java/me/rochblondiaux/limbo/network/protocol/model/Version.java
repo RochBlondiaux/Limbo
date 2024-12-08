@@ -129,4 +129,13 @@ public enum Version {
     public static Version of(int protocolNumber) {
         return VERSION_MAP.getOrDefault(protocolNumber, UNDEFINED);
     }
+
+    public static Version of(String version) {
+        return Version.valueOf("V" + version.replace(".", "_"));
+    }
+
+    @Override
+    public String toString() {
+        return this.prettyName();
+    }
 }

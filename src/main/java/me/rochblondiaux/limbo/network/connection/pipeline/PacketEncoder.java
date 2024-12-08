@@ -31,7 +31,7 @@ public class PacketEncoder extends MessageToByteEncoder<ClientboundPacket> {
         // Retrieve the packet ID
         int packetId = this.registry.getPacketId(packet instanceof PacketSnapshot snapshot ? snapshot.packet().getClass() : packet.getClass());
         if (packetId == -1) {
-            log.error("Unknown packet: {}[0x{}] ({} bytes}", packet.getClass().getSimpleName(), Integer.toHexString(packetId), output.readableBytes());
+            log.error("Unknown packet: {}[0x{}] ({} bytes)", packet.getClass().getSimpleName(), Integer.toHexString(packetId), output.readableBytes());
             return;
         }
 
@@ -54,6 +54,6 @@ public class PacketEncoder extends MessageToByteEncoder<ClientboundPacket> {
     }
 
     public void updateState(ConnectionState state) {
-        this.registry = state.serverBound().getRegistry(version);
+        this.registry = state.clientBound().getRegistry(version);
     }
 }

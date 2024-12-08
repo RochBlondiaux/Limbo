@@ -36,6 +36,6 @@ public class ServerboundHandshakePacket implements ServerboundPacket {
 
     @Override
     public void handle(Limbo app, LimboServer server, ClientConnection connection) {
-        log.info("Received handshake packet from {}", connection.address());
+        server.packetHandler().handle(connection, this);
     }
 }

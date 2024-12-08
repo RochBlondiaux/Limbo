@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import me.rochblondiaux.limbo.Limbo;
 import me.rochblondiaux.limbo.connection.ConnectionManager;
+import me.rochblondiaux.limbo.network.PacketHandler;
 import me.rochblondiaux.limbo.network.connection.ClientChannelInitializer;
 import me.rochblondiaux.limbo.network.protocol.model.Version;
 
@@ -25,6 +26,7 @@ public class LimboServer {
     private final Version version;
     private final ConnectionManager connections;
 
+    private PacketHandler packetHandler;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
@@ -39,6 +41,9 @@ public class LimboServer {
 
         // Disable resource leak detection
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
+
+        // Packet handler
+        this.packetHandler = new PacketHandler(this.app, this);
 
         // Bootstrap
         this.startBootstrap();
